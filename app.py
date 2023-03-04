@@ -22,7 +22,26 @@ full_url = "https://openai.com/"
 
 #class to parse HTML and get hyperlinks
 class HyperlinkParser(HTMLParser):
-    def__init__(self):
+    def __init__(self):
         super().__init__()
         #create list to store hyperlinks
-        self.hyperlinks
+        self.hyperlinks = []
+
+    #override HTMLParser handle_starttag method to get hyperlinks
+    def handle_starttag(self, tag, attrs):
+        attrs = dict(attrs)
+
+        #if the tag is a anchor tag and has a href attribute, add the href attribute to the list of hyperlinks
+        if tag == "a" and "href" in attrs:
+            self.hyerlinks.append(attrs["href"])
+
+    #this section of the code defines a function called get_hyperlinks that takes a URL as input, tries to open the URL
+    # and read the HTML, and then parses the HTML to get hyperlinks. If the respone is not HTML it returns an empty list!
+
+    #function get hyperlinks from a URL
+    def get_hyperlinks(url):
+        try:
+            with urllib.request.urlopen(url) as response:
+                if not response.info().get('Content-Type').startswith("text/html"):
+                    return []
+    
