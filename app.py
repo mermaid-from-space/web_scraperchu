@@ -44,4 +44,16 @@ class HyperlinkParser(HTMLParser):
             with urllib.request.urlopen(url) as response:
                 if not response.info().get('Content-Type').startswith("text/html"):
                     return []
+
+                #decode the html
+                html = response.read().decode('utf-8')
+        except Exception as e:
+            print(e)
+            return []
+
+        #create the HTML parser and then parse the html to get hyperlinks
+        parser = HyperlinkParser()
+        parser.feed(html)
+
+        return parser.hyperlinks
     
