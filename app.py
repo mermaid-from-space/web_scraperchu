@@ -87,4 +87,54 @@ def get_domain_hyperlinks(local_domain, url):
 return list(set(clean_links))
 
 
-    
+def crawl(url):
+    #parse the URL and get the domain
+    local_domain = urlparse(url).netloc
+
+    #create a queue to store the URLS to crawl
+    queue = deque([url])
+
+    #create a set to store the urls that have already been seen (no duplicates)
+    seen = set([url])
+
+    # create a directory to store the text files
+    if not os.path.exists("text/"):
+        os.mkdir("text/")
+
+    if not os.path.exits("text/"+local_domain+"/"):
+        os.mkdir("text/"+ local_domain + "/")
+
+    # create directory to store the cvs files
+    if not os.path.exists("processed"):
+        os.mkdir("processed")
+
+    # while the que is not empty, continue crawling
+    while queue:
+
+        #get the next URL from the queue
+        url = queue.pop()
+        print(url) #for debugging and to see the progress
+
+        #save text from the url to a <url>.txt file
+        with open("text/"+local_domain+"/"+url[8:].replace("/","_") + ".txt", "w", encoding="UTF-8") as f:
+
+            # get the text from the URL using BeautifulSoup
+            soup = BeautifulSoup(requests.get(url).text, "html.parser")
+
+            # get the text but remove the tags
+            text = soup.get_text()
+
+            # if the crawler gets to a page that requires Javascript, it will stop the crawl
+            if ("You need to enable JavaScript to run this app." in text):
+                print("Unable to parse page " + url + "due to JavaScript being required")
+
+            # otherwise, write the text to the file in the text directory
+            f.write(text)
+
+        # get the hyperlinks from the URL and add them to the queue
+        for link in get_domain_hyperlinks(local_domain, url):
+            if link not in see:
+                queue.append(link)
+                seen.add(link)
+
+crawl(full_url)
