@@ -138,3 +138,50 @@ def crawl(url):
                 seen.add(link)
 
 crawl(full_url)
+
+
+#this section of code defines a function called remove_newlines that takes a pandas series object
+# as input, replaces newlines with spaces, and returns the modified series.
+def remove_newlines(serie):
+    serie = serie.str.replace('\n', ' ')
+    serie = serie.str.replace('\\n', ' ')
+    serie = serie.str.replace('  ', ' ')
+    serie = serie.str.replace('  ', ' ')
+    return serie
+
+   # Create a list to store the text files
+texts=[]
+
+# Get all the text files in the text directory
+for file in os.listdir("text/" + domain + "/"):
+
+    # Open the file and read the text
+    with open("text/" + domain + "/" + file, "r", encoding="UTF-8") as f:
+        text = f.read()
+
+        # Omit the first 11 lines and the last 4 lines, then replace -, _, and #update with spaces.
+        texts.append((file[11:-4].replace('-',' ').replace('_', ' ').replace('#update',''), text))
+
+# Create a dataframe from the list of texts
+df = pd.DataFrame(texts, columns = ['fname', 'text'])
+
+# Set the text column to be the raw text with the newlines removed
+df['text'] = df.fname + ". " + remove_newlines(df.text)
+df.to_csv('processed/scraped.csv')
+df.head()
+
+# This section of the code loads a tokenizer and applies it to the text column of the dataframe 
+# to get the number 
+# of tokens for each row. It then creates a histogram of the number of tokens per row.
+
+# Load the cl100k_base tokenizer which is designed to work with the ada-002 model
+tokenizer = tiktoken.get_encoding("cl100k_base")
+
+df = pd.read_csv('processed/scraped.csv', index_col=0)
+df.columns = ['title', 'text']
+
+# Tokenize the text and save the number of tokens to a new column
+df['n_tokens'] = df.text.apply(lambda x: len(tokenizer.encode(x)))
+
+# Visualize the distribution of the number of tokens per row using a histogram
+df.n_tokens.hist()
