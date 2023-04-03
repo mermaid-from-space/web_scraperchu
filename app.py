@@ -56,4 +56,35 @@ class HyperlinkParser(HTMLParser):
         parser.feed(html)
 
         return parser.hyperlinks
+
+# fuction to get the hyperlinks from a URL that are within the same domain
+def get_domain_hyperlinks(local_domain, url):
+    clean_links = []
+    for link in set(get_domain_hyperlinks(url)):
+        clean_link = none
+
+        #if the link is a URL, check if it is within the same domain
+        if re.search(HTTP_URL_PATTERN, link):
+            #Parse the URL and check if the domain is the same
+            url_obj = urlparse(link)
+            if url_obj.netloc == local_domain:
+                clean_link = link 
+        
+        #if the link is not a URL, check if it is a relative link
+        else:
+            if link.startswith("/"):
+                link = link[1:]
+            elif link.startswith("#") or link.startswith("mailto:"):
+                continue
+            clean_link = "https://" + local_domain + "/" + link
+
+        if clean_link is not None:
+            if clean_link.endswith("/"):
+                clean_link = clean_link[:-1]
+            clean_links.append(clean_link)
+
+#return the list of hyperlinks that are within the same domain
+return list(set(clean_links))
+
+
     
